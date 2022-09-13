@@ -45,10 +45,20 @@ exports.register = async (req, res) => {
       httpOnly: true,
     };
 
+    var otp = Math.floor(1000 + Math.random() * 9000);
+    const message = `Your OTP is: \n\n ${otp} \n `;
+
+      await sendEmail({
+        email: user.email,
+        subject: "OTP Verification",
+        message,
+      });
+
     res.status(201).cookie("token", token, options).json({
       success: true,
       user,
       token,
+      message: `Email sent to ${user.email}`
     });
   } catch (error) {
     res.status(500).json({
@@ -90,10 +100,20 @@ exports.login = async (req, res) => {
       httpOnly: true,
     };
 
+    var otp = Math.floor(1000 + Math.random() * 9000);
+    const message = `Your OTP is: \n\n ${otp} \n `;
+
+      await sendEmail({
+        email: user.email,
+        subject: "OTP Verification",
+        message,
+      });
+
     res.status(200).cookie("token", token, options).json({
       success: true,
       user,
       token,
+      message: `Email sent to ${user.email}`
     });
   } catch (error) {
     res.status(500).json({

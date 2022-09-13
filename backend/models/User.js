@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema({
     },
   ],
 
+  tasks: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Task",
+    },
+  ],
+
   followers: [
     {
       type: mongoose.Schema.Types.ObjectId,
