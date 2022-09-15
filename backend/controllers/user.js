@@ -48,7 +48,7 @@ exports.register = async (req, res) => {
     var otp = Math.floor(1000 + Math.random() * 9000);
     const message = `Your OTP is: \n\n ${otp} \n `;
 
-      await sendEmail({
+       sendEmail({
         email: user.email,
         subject: "OTP Verification",
         message,
@@ -103,7 +103,7 @@ exports.login = async (req, res) => {
     var otp = Math.floor(1000 + Math.random() * 9000);
     const message = `Your OTP is: \n\n ${otp} \n `;
 
-      await sendEmail({
+      sendEmail({
         email: user.email,
         subject: "OTP Verification",
         message,
