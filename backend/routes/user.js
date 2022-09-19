@@ -23,7 +23,7 @@ router.route("/register").post(register);
 
 router.route("/login").post(login);
 
-router.route("/loggedOut").get(loggedOut);
+router.route("/loggedOut").post(loggedOut);
 
 router.route("/follow/:id").get(isAuthenticated, followUser);
 

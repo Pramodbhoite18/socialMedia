@@ -48,18 +48,21 @@ exports.register = async (req, res) => {
     var otp = Math.floor(1000 + Math.random() * 9000);
     const message = `Your OTP is: \n\n ${otp} \n `;
 
-       sendEmail({
-        email: user.email,
-        subject: "OTP Verification",
-        message,
-      });
-
-    res.status(201).cookie("token", token, options).json({
-      success: true,
-      user,
-      token,
-      message: `Email sent to ${user.email}`
+    sendEmail({
+      email: user.email,
+      subject: "OTP Verification",
+      message,
     });
+
+    res
+      .status(201)
+      .cookie("token", token, options)
+      .json({
+        success: true,
+        user,
+        token,
+        message: `Email sent to ${user.email}`,
+      });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -79,7 +82,7 @@ exports.login = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
-        success: true,
+        success: false,
         message: "User does not exist",
       });
     }
@@ -93,6 +96,10 @@ exports.login = async (req, res) => {
       });
     }
 
+    user.loginStatus = true;
+
+    await user.save();
+
     const token = await user.generateToken();
 
     const options = {
@@ -103,18 +110,21 @@ exports.login = async (req, res) => {
     var otp = Math.floor(1000 + Math.random() * 9000);
     const message = `Your OTP is: \n\n ${otp} \n `;
 
-      sendEmail({
-        email: user.email,
-        subject: "OTP Verification",
-        message,
-      });
-
-    res.status(200).cookie("token", token, options).json({
-      success: true,
-      user,
-      token,
-      message: `Email sent to ${user.email}`
+    sendEmail({
+      email: user.email,
+      subject: "OTP Verification",
+      message,
     });
+
+    res
+      .status(200)
+      .cookie("token", token, options)
+      .json({
+        success: true,
+        user,
+        token,
+        message: `Email sent to ${user.email}`,
+      });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -126,13 +136,51 @@ exports.login = async (req, res) => {
 //Log Out
 exports.loggedOut = async (req, res) => {
   try {
-    res
+    if (req.body.email && req.body.password) {
+      const { email, password } = req.body;
+
+      const user = await User.findOne({ email }).select("+password");
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "User does not exist",
+        });
+      }
+
+      const isMatch = await user.matchPassword(password);
+
+      if (!isMatch) {
+        return res.status(400).json({
+          success: false,
+          message: "Incorrect Password",
+        });
+      }
+    if(user.loginStatus == true){
+      user.loginStatus = false;
+      await user.save();
+      res
       .status(200)
-      .cookie("token", null, { expires: new Date(Date.now()), httpOnly: true })
+      .cookie("token", null, {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+      })
       .json({
         success: true,
         message: "Logged Out",
       });
+    }else{
+      return res.status(400).json({
+        success: false,
+        message: "You are Already Logged Out..",
+      });
+    }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Email & Password required..",
+      });
+    }
   } catch (error) {
     res.status(500).json({
       success: false,
